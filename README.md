@@ -1,93 +1,280 @@
-# p8_hyu424
+# P8 (5% of grade): BigQuery, Loans Data
 
-Project p8 of hyu424
+## Overview
 
-## Getting started
+In this project, we'll study the use of several offerings from Google Cloud Platform (GCP), including BigQuery and GCS.
+You'll be combining data from several sources: a public BigQuery dataset
+describing the geography of US counties, the HDMA loans dataset used
+previously this semester, and pretend loan applications made via a
+Google form (you'll make some submissions yourself and then
+immediately analyze the results).
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+Learning objectives:
+* combine data from a variety of sources to compute results in BigQuery
+* query live results from a Google form/sheet
+* train linear regression model using BigQuery
+* manipulate geographic data
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Before starting, please review the [general project directions](../projects.md).
 
-## Add your files
+## Clarifications/Correction
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+* none yet
+
+# Setup
+
+### venv
+Setup a Python `venv` for this project **inside your project directory**.
+```shell
+sudo apt install python3.12-venv # or whatever python version you have installed
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### Dependencies
+
+Install dependencies for your activated `venv` with `pip3`
 
 ```
-cd existing_repo
-git remote add origin https://git.doit.wisc.edu/cdis/cs/courses/cs544/f24/p8/p8_hyu424.git
-git branch -M main
-git push -uf origin main
+pip3 install jupyterlab google-cloud-bigquery google-cloud-bigquery-storage pyarrow tqdm ipywidgets pandas matplotlib db-dtypes pandas-gbq
 ```
 
-## Integrate with your tools
+#### Google cloud CLI (if applicable)
 
-- [ ] [Set up project integrations](https://git.doit.wisc.edu/cdis/cs/courses/cs544/f24/p8/p8_hyu424/-/settings/integrations)
+**Only** run this if `gcloud` is not a valid command on your VM (Debian/Ubuntu):
 
-## Collaborate with your team
+```shell
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+sudo apt-get update && sudo apt-get install google-cloud-cli
+```
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+You'll also need to give your VM permission to access BigQuery and
+Google Drive.  You can do so by pasting the following into the
+terminal on your VM and following the directions. Please read the following cautions before running this command.
 
-## Test and Deploy
+```
+gcloud auth application-default login --scopes=openid,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/drive.readonly
+```
 
-Use the built-in continuous integration in GitLab.
+### Caution
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+1. While running the command, it will ask you to paste some link to your browser. If you have multiple Google accounts in your browser, and do not want this to select the default one, then do the following: 
+    * paste the link in an incognito mode
+    * login to the Google account of your choice
+2. **Be careful**, because if a malicious party were to gain access to your
+VM, they would have free access to all your Google Drive files (and
+more).  For example, if your Jupyter is listening publicly (i.e.,
+0.0.0.0 instead of localhost) and you have a weak password (or no
+password), someone could gain access to your VM, and then these other
+resources.
+3. You may need to run this command again if you run into an error like `"Reauthentication is needed"`.
 
-***
+When you're not actively working, you may want to revoke (take away)
+the permissions your VM has to minimize risk:
 
-# Editing this README
+```bash
+gcloud auth application-default revoke
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+(Optional) If you're worried about exhausting the free tier and your educational
+credits, you might also want to setup a quota [here](https://console.cloud.google.com/iam-admin/quotas).
 
-## Suggestions for a good README
+## Notebook
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+You'll create a `p8.ipynb` notebook inside of `src/`.  You'll answer 10 questions in the notebook.
 
-## Name
-Choose a self-explaining name for your project.
+With your `venv` still active, run:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```bash
+python3 -m jupyterlab --no-browser
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+1. Setup an SSH tunnel and connect (as done in previous projects)
+2. You'll be prompted to copy/paste a token from the terminal to the browser. 
+3. Finally, create a notebook named `p8.ipynb` inside of `src/`.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## Outputs
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+> **Important:**
+> 
+> If the output of a cell answers question
+3, start the cell with a comment: `#q3`.  The autograder depends on
+this to correlate parts of your output with specific questions.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+> **Important**:
+>
+> The autograder will extract your output from these cells, so it won't
+give points if not formatted correctly (extra spaces, split cells,
+etc.).
+>
+> For this project, answers are simple types (e.g., `int`s,
+`float`s, `dict`s), so you'll need to do a little extra work to get
+results out of the DataFrames you get from BigQuery.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## Part 1: County Data (Public Dataset)
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### Dataset
+For this part, you'll use the
+`bigquery-public-data.geo_us_boundaries.counties` table.  This
+contains names, IDs, boundaries, and more for every county in the
+United States.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+### Schema
+You can view the schema of this dataset (this might be helpful to reference for this project)
+If we hadn't provided you with the name of the table, you could have found
+it yourself as follows:
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+1. Visit [Google Marketplace](https://console.cloud.google.com/marketplace)
+2. Using the Category, Type, and Price filters select "Maps", "Datasets", and "Free" respectively
+3. Click "Census Bureau US Boundaries"
+4. Click "VIEW DATASET"
+5. From this view, you can expand the `geo_us_boundaries` dataset to see `counties` and other related tables; you can also browse the other datasets under the `bigquery-public-data` category
+   - When viewing a BQ table, there are multiple tabs that are useful, including `schema` and `preview`
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### SQL Editor
+Once you have the table selected, you can also click `Query > In new tab` to open a SQL editor with the table loaded.
 
-## License
-For open source projects, say how it is licensed.
+This page is very useful to write SQL queries from scratch. Any SQL query that executes here will also be able to execute in the Python client.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+You will need to reference this page to answer a few questions while writing and executing your queries.
+
+> Tip: You can click on More > Format Query to "prettify" your query string
+
+![img_3.png](img_3.png)
+
+# Questions
+
+#### Q1: What is the `geo_id` for Dane county? 
+
+###### Expected return type: `str`
+
+
+#### Q2: How many counties are there per state? Answer for the **five** states with the most counties.
+
+###### Expected return type: a Python dict, where the keys are the state FIPS codes (which are strings) and the values are the counts (ints).
+
+
+#### Q3: How much do the queries for the last two questions cost, in terms of bytes billed? Answer for both `q1` and `q2` with human readable strings using "MB" for units (like "50 MB").
+
+Hint: if you run the query more than once, bytes billed might appear as zero, due to cached results.  To get actual cost for a fresh run, disable caching as in lecture:
+
+https://git.doit.wisc.edu/cdis/cs/courses/cs544/f24/main/-/tree/main/lec/37-bq?ref_type=heads
+
+The result should be something like this, with bytes replacing the "????" parts:
+
+```
+{
+    "q1": "????",
+    "q2": "????"
+}
+```
+
+## Part 2: HDMA Data (Parquet in GCS)
+
+### Setup
+Download https://pages.cs.wisc.edu/~harter/cs544/data/hdma-wi-2021.parquet. 
+
+Navigate to [Google Cloud Storage WebUI](https://console.cloud.google.com/storage/):
+1. Create a private GCS bucket.  You can name it whatever you want.  For example, we used `cs544_p8`.  Names must be globally unique, though, and we used that one, so you'll need to choose another name.
+2. Upload the parquet file to your bucket.
+
+Write code to create a dataset called `p8` in your GCP project.  Use
+`exists_ok=True` so that you can re-run your code without errors. Load the data into a new table called `hdma`.
+
+> Note: Once you've uploaded your table successfully, you should be able to see it (schema, preview, etc.) in the [BigQuery explorer](https://console.cloud.google.com/bigquery):
+> 
+> `{project_name}` > `p8` > `hdma`
+
+#### Q4: what are the datasets in your GCP project?
+
+###### Expected return type Python list of dataset IDs (strings).
+
+
+#### Q5: how many loan applications are there in the HDMA data for each county?
+
+###### Expected return type: a Python dict
+- The key in the `dict` should be the county name, and the value should be the count; the dict should only contain the 10 counties with **most** applications.
+
+> Hint: You'll need to join your private table on the public counties table to get the county name.
+
+## Part 3: Application Data (Google Sheet Linked to Form)
+
+Now let's pretend you have a very lucrative data science job and want to buy a vacation home in WI.  First, decide a few things:
+
+1. What do you wish your income to be?  (be reasonable!)
+2. How expensive of a house would you like to buy?
+3. Where in WI would you like the house to be?  (use a tool like Google maps to identify exact latitude/longitude coordinates)
+
+Apply for your loan in the [Google Form](https://forms.gle/AfeLnF4ydAZ5HpHn7). Feel free to apply multiple
+times if a single vacation home is insufficient for your needs. The form is linked to [this spreadsheet](https://docs.google.com/spreadsheets/d/13e14LzDDm9U4y2KddlKFAy7exNdbo1OwJa-OTe4ywiw/edit?usp=sharing).
+
+Now, run some code to add the sheet as an external BigQuery table. The name of the table must be `applications`.
+
+#### Q6: How many applications are there with your chosen income?
+
+###### Expected return type: a Python int
+
+> Note: The result could change depending on what income you chose, and how
+many others with the same income have submitted applications.
+
+
+#### Q7: What is the R^2 score if we do a linear regression over income (x) and loan amount (y)?
+
+Create a BigQuery model of type "LINEAR_REG" to answer this, and evaluate to get the `r2_score` metric.
+
+You don't have to worry about train/test splits for this (for example, you can use the same data to train and evaluate if you like).
+
+###### Expected return type: a Python float
+
+## Part 4: Geography
+
+#### Q8: How close to the WI state capitol is the closest application?
+
+Answer in meters.
+
+###### Expected return type: a Python float
+
+
+#### Q9: How many applications are there in the Google sheet per WI county? Ignore any loans that fall outside of Wisconsin.
+
+> Hint: Use the `counties.county_geom`, `applications.longitude` and `applications.latitude` columns to join.  You can hardcode the state FIPS code to '55' (for WI).
+
+Answer with a dict that maps county name to count.
+
+At the moment, the answer would look like this:
+
+```
+{'Dane': 2, 'Marinette': 1}
+```
+
+By time you run it, there will probably be more counties and higher counts from people submitting the form.
+
+
+#### Q10: Which WI counties border Dane county?
+
+> Hint: look around the `bigquery-public-data.geo_us_boundaries` dataset for any tables that can help you.
+
+###### Expected return type: a Python list of county names, sorted alphabetically.
+
+
+## Testing
+
+You can use `autograde.py` to check the contents of `p8.ipynb`:
+
+```bash
+python3 autograde.py
+```
+
+It's OK if you hardcode some things in your notebook related to your Google account (like your GCP project name). 
+
+## Submission
+
+When you are all done, commit and push to GitLab.
+
+Do not forget to revoke the permission to access your Google Drive. Run the following command in your VM.
+
+```
+gcloud auth application-default revoke
+```
