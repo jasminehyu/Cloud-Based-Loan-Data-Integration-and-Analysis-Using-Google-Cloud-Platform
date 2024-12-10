@@ -1,0 +1,23 @@
+{
+  "score": 80,
+  "full_score": 100,
+  "tests": {
+    "q1": "PASS (10/10)",
+    "q2": "PASS (10/10)",
+    "q3": [
+      "Traceback (most recent call last):\n",
+      "  File \"/home/hyu424/p8_hyu424/autograde.py\", line 83, in run\n    result = self.func()\n             ^^^^^^^^^^^\n",
+      "  File \"/home/hyu424/p8_hyu424/autograde.py\", line 571, in q3\n    assert output == {\"q1\": \"10 MB\", \"q2\": \"10 MB\"}, \"Wrong answer\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+      "AssertionError: Wrong answer\n"
+    ],
+    "q4": "PASS (10/10)",
+    "q5": "PASS (10/10)",
+    "q6": "PASS (10/10)",
+    "q7": "PASS (10/10)",
+    "q8": "PASS (10/10)",
+    "q9": "PASS (10/10)",
+    "q10": [
+      "Wrong answer."
+    ]
+  }
+}
