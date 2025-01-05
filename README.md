@@ -12,7 +12,7 @@ This personal project demonstrates my proficiency in leveraging Google Cloud Pla
 - Explore geographic data handling capabilities in BigQuery.
 
 ## Technical Setup
-- Virtual Environment
+**Virtual Environment**
 Setup a Python virtual environment to manage project dependencies.
 
 ```python
@@ -20,14 +20,14 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-- Dependencies
+**Dependencies**
 Install the necessary Python packages within the virtual environment.
 
 ```python
 pip install jupyterlab google-cloud-bigquery google-cloud-bigquery-storage pyarrow tqdm ipywidgets
 pandas matplotlib db-dtypes pandas-gbq
 ```
-- Google Cloud Configuration
+**Google Cloud Configuration**
 Configure Google Cloud CLI and authenticate to access BigQuery and Google Drive.
 
 ```python
